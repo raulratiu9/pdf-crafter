@@ -1,14 +1,29 @@
-import axios from 'axios';
+import axios from "axios";
 
-import './App.css';
-import { useState } from 'react';
+import "./App.css";
+import { useState } from "react";
+import { saveAs } from "file-saver";
 
 function App() {
-  const [form, setForm] = useState();
+  const [form, setForm] = useState({
+    name: "",
+    receiptId: 0,
+    price1: 0,
+    price2: 0,
+  });
 
-  const handleChange = ({target: {value, name}}) => setForm({[name]: value});
+  const handleChange = ({ target: { value, name } }) =>
+    setForm((prevState) => ({ ...prevState, [name]: value }));
 
-  const createAndDownloadPdf = axios.post('/create-pdf', form)
+  const createAndDownloadPdf = async () =>
+    await axios
+      .post("/create-pdf", form)
+      .then(async () => await axios.get("fetch-pdf", { responseType: "blob" }))
+      .then((res) => {
+        const pdfBlob = new Blob([res.data], { type: "application/pdf" });
+        saveAs(pdfBlob, "newPdf.pdf");
+      });
+  console.log(form);
 
   return (
     <div className="App">
